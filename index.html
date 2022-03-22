@@ -67,7 +67,8 @@
 			<button type="button" onClick="RemoveCircle()">⏵ </button>
 			<button type="button" onClick="Pause()"> ⏸ </button>
 			<button type="button" onClick="SpeedUp()">>></button>
-			<label id="speed"> Vitesse j/ms: 1000 </label>
+			</br></br>
+			<label id="speed">Vitesse (j/ms) : 1 jour toutes les 1000 ms</label>
 			</br>
 
 		</div>
@@ -163,7 +164,7 @@
 			if (speed > 100) {
 				clearInterval(repeat);
 				speed = speed - 100
-				document.getElementById('speed').innerHTML = "Vitesse j/ms : " + speed;
+				document.getElementById('speed').innerHTML = "Vitesse (j/ms) : 1 jour toutes les " + speed + " ms";
 				repeat = setInterval(dispCircle, speed);
 			}
 
@@ -171,7 +172,7 @@
 		function SpeedDown() {
 			clearInterval(repeat);
 			speed = speed + 100
-			document.getElementById('speed').innerHTML = "Vitesse j/ms : " + speed;
+			document.getElementById('speed').innerHTML = "Vitesse (j/ms) : 1 jour toutes les " + speed + " ms";
 			//console.log(speed);
 			repeat = setInterval(dispCircle, speed);
 		}
