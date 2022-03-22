@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Earthquake Markers</title>
+	<link rel="icon" href="Img/favicon.ico" />
+
+	<link rel="stylesheet" href="style.css">
+
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCozaGLPUjkSZ07nVTCJbZWLmX5lWm-ORE&libraries=&v=weekly"
+			async></script>
+
+
+
+</head>
+<body id="body">
+
+	<p>
+		<h1> Visualisation des tremblements de terre dans le monde </h1>
+	</p>
+
+	<div id="parametres">
+
+		<h2> Paramètres : </h2>
+		<div>
+			<h3>Période :</h3>
+			<label for="start">Début : </label>
+			<input type="date" id="start" value="2000-03-03">
+			<br /><br />
+			<label for="end">Fin : </label>
+			<input type="date" id="end" value="2021-03-03">
+		</div>
+
+		<div>
+			<h3>Magnitude :</h3>
+			<label for="min">Minimum : </label>
+			<input type="number" id="min" value="0">
+			<br /><br />
+			<label for="max">Maximum : </label>
+			<input type="number" id="max" value="9">
+		</div>
+
+		<div>
+			<h3>Couleur des marqueurs :</h3>
+			<input type="color" id="color" value="#e82121">
+		</div>
+		</br>
+		<div>
+			<label>Mode nuit ?</label>
+			<input type="checkbox" id="modenuit" onClick="nightMode()">
+
+		</div>
+		</br>
+		<div>
+			<button type="button" onClick="valider()">Valider</button>
+		</div>
+
+		</br>
+
+
+		<div id="lecture">
+			<h3> Mode lecture : </h3>
+			<button type="button" onClick="SpeedDown()"><<</button>
+			<button type="button" onClick="RemoveCircle()">⏵ </button>
+			<button type="button" onClick="Pause()"> ⏸ </button>
+			<button type="button" onClick="SpeedUp()">>></button>
+			<label id="speed"> Vitesse j/ms: 1000 </label>
+			</br>
+
+		</div>
+		</br>
+		<div>
+			<label id="date"> Date: 2000-03-03 </label>
+		</div>
+		</br>
+	</div>
+	<div id="map">
+		<p align="center" style="padding-top: 15%">
+			<img src="GIF/giphy.webp" />
+		</p>
+	</div>
+	<footer>
+		<p>© 2021 Antoine Escriva et Florian Bossard, étudiants de SupGalilée </p>
+	</footer>
+
+
+	<script>
+		function nightMode() {
+			if (document.getElementById("modenuit").checked) {
+				//document.getElementById("paramètres").style.color = "white";
+				//document.getElementById("paramètres").style.background = "#404040";
+				document.getElementById("body").style.color = "white";
+				document.getElementById("body").style.background = "#404040";
+				document.getElementById("info").style.color = "black";
+				document.getElementById("info").style.background = "white";
+			} else {
+				//document.getElementById("paramètres").style.color = "#404040";
+				//document.getElementById("paramètres").style.background = "white";
+				document.getElementById("body").style.color = "#404040";
+				document.getElementById("body").style.background = "white";
+				document.getElementById("info").style.color = "black";
+				document.getElementById("info").style.background = "white";
+			}
+		}
+		Date.prototype.AddDays = function (days) {
+			days = parseInt(days, 10);
+			return new Date(this.valueOf() + 1000 * 60 * 60 * 24 * days);
+		}
+		var repeat;
+		function RemoveCircle() {
+			//console.log(dict_earthquake.size);
+			for (var [key, value] of dict_earthquake) {
+				//console.log("key:");
+				//console.log(key);
+				if (Array.isArray(value)) {
+					//console.log("values:");
+					for (var i = 0; i < value.length; i++) {
+						value[i].setMap(null);
+						//console.log(value[i]);
+					}
+				} else {
+					//console.log("value");
+					//console.log(value);
+					value.setMap(null);
+				}
+			}
+
+			repeat = setInterval(dispCircle, speed)
+		}
+
+		function dispCircle() {
+
+			//console.log(from_dispCircle.toDateString());
+			var val = dict_earthquake.get(from_dispCircle.toDateString());
+			//console.log(val)
+			if (val != undefined) {
+				//console.log("coucou")
+
+				if (Array.isArray(val)) {
+					for (var i = 0; i < val.length; i++) {
+						val[i].setMap(map);
+						//console.log(value[i]);
+					}
+				} else {
+					//console.log(val);
+					val.setMap(map);
+				}
+			}
+			from_dispCircle = from_dispCircle.AddDays(1);
+			//console.log(from_dispCircle)
+			if (from_dispCircle >= to) {
+
+				clearInterval(repeat);
+			}
+			document.getElementById('date').innerHTML = "Date : " + from_dispCircle.toDateString();
+
+		}
+		function SpeedUp() {
+
+			if (speed > 100) {
+				clearInterval(repeat);
+				speed = speed - 100
+				document.getElementById('speed').innerHTML = "Vitesse j/ms : " + speed;
+				repeat = setInterval(dispCircle, speed);
+			}
+
+		}
+		function SpeedDown() {
+			clearInterval(repeat);
+			speed = speed + 100
+			document.getElementById('speed').innerHTML = "Vitesse j/ms : " + speed;
+			//console.log(speed);
+			repeat = setInterval(dispCircle, speed);
+		}
+		function Pause() {
+			clearInterval(repeat);
+
+		}
+
+		var speed = 1000;
+		var dict_earthquake;
+		var from_dispCircle;
+		var from;
+		var to;
+		const regex = new RegExp('http://dbpedia.org/resource/');
+		var map;
+		function valider() {
+
+			dict_earthquake = new Map();
+			map = new google.maps.Map(document.getElementById("map"), {
+				zoom: 3,
+				center: new google.maps.LatLng(43, 3),
+				mapTypeId: "terrain",
+			});
+			var EqCircle;
+
+			var infoWindow = [];
+			var str = [];
+
+			var min = $("#min").val();
+			var max = $("#max").val();
+			var mag;
+
+			var check;
+			from = new Date($("#start").val());
+			to = new Date($("#end").val());
+			from_dispCircle = new Date($("#start").val());
+			document.getElementById('date').innerHTML = "Date : " + from_dispCircle.toDateString();
+
+			var color = $("#color").val();
+
+			var mag;
+			var lati;
+			var longi;
+			var time;
+			var country;
+
+
+			const eqfeed_callback = function (resultats) {
+				for (let i = 0; i < resultats.length; i++) {
+
+					mag = parseFloat(resultats[i].mag.value);
+					lati = parseFloat(resultats[i].lat.value);
+					longi = parseFloat(resultats[i].long.value);
+					time = resultats[i].time.value;
+					country = resultats[i].country.value;
+					check = new Date(time);
+
+
+					str[i] = "<div id=\"info\"> <p>Magnitude : " + mag + "</p>"
+						+ "<p>Longitude : " + lati + "</p>"
+						+ "<p>Latitude : " + longi + "</p>"
+						+ "<p>Date : " + time + "</p>";
+
+					if (regex.test(country)) {
+						str[i] += "<p>Région touchée : " + country.substring(28).replaceAll('_', ' ') + "</p> </div>";
+
+					} else {
+						if (resultats[i].country.value === "") {
+                            str[i] += "<p>Région touchée : Aucune </p> </div>";
+						} else {
+                            str[i] += "<p>Région touchée : " + country + "</p> </div>";
+						}
+					}
+
+					if (mag >= min && mag <= max && from <= check && check <= to) {
+						EqCircle = new google.maps.Circle({
+							radius: 2000 * Math.pow(2, mag) / 2,
+							strokeColor: "white",
+							fillColor: color,
+							fillOpacity: 0.2,
+							strokeWeight: 0.5,
+							map: map,
+							clickable: true,
+							center: { lat: lati, lng: longi }
+						});
+						//console.log(check.toDateString());
+						if (dict_earthquake.get(check.toDateString()) != undefined) {
+							//console.log("if");
+							var val = dict_earthquake.get(check.toDateString());
+							//console.log(val);
+							if (Array.isArray(val)) {
+								val.push(EqCircle)
+								//console.log("array");
+								//console.log(val);
+								dict_earthquake.set(check.toDateString(), val);
+							} else {
+								//console.log("create array");
+								var list = [val];
+								list.push(EqCircle)
+								//console.log(list);
+								dict_earthquake.set(check.toDateString(), list);
+							}
+						} else {
+							//console.log("else");
+							//console.log("no value");
+							dict_earthquake.set(check.toDateString(), EqCircle);
+						}
+
+						infoWindow[i] = new google.maps.InfoWindow({
+							content: str[i],
+							maxWidth: 500
+						});
+
+						google.maps.event.addListener(EqCircle, 'click', function () {
+
+							infoWindow[i].setPosition({ lat: parseFloat(resultats[i].lat.value), lng: parseFloat(resultats[i].long.value) });
+							infoWindow[i].open(map);
+						});
+
+					}
+					else {
+						str[i] = "";
+					}
+				}
+			};
+			//console.log(dict_earthquake)
+			var url = "http://dbpedia.org/sparql";
+
+			var query = [
+				"PREFIX dbo:<http://dbpedia.org/ontology/>",
+				"PREFIX xsd:<http://www.w3.org/2001/XMLSchema#> ",
+				"PREFIX dbp:<http://dbpedia.org/property/> ",
+				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
+				"PREFIX foaf: <http://xmlns.com/foaf/0.1/> ",
+				"PREFIX h: <http://dbpedia.org/resource/> ",
+				"PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>",
+				"select ?eq ?mag ?lat ?long ?time ?country where ",
+				"{  ?eq a dbo:Earthquake.",
+				"?eq dbp:magnitude ?mag.",
+				"?eq geo:lat ?lat.",
+				"?eq geo:long ?long.",
+				"?eq dbp:timestamp ?time.",
+				"?eq dbp:countriesAffected ?country.",
+				"FILTER(isNumeric(?mag))}"
+			].join(" ");
+
+			var queryUrl = url + "?query=" + encodeURIComponent(query) + "&format=json";
+			var resultats;
+			$.ajax({
+				dataType: "jsonp",
+				url: queryUrl,
+				success: function (_data) {
+					resultats = _data.results.bindings;
+					eqfeed_callback(resultats);
+				}
+			});
+
+
+		}
+
+	</script>
+
+</body>
+</html>

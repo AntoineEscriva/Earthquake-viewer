@@ -1,0 +1,44 @@
+#map {
+          background-color : black;
+          height: 88%;
+          width: 76%;
+          display: inline-block;
+		  border: solid;
+
+      }
+#parametres {
+		
+		  padding-left : 1%;
+          width: 21%;
+          display: inline-block;
+          vertical-align:top;
+		  border: solid;
+}
+#info {
+    color : black;
+    background : white;
+}
+html,body {
+	 
+        height: 100%;
+        margin: 0;
+        padding: 0;
+}
+	  
+h1 { 
+		text-align : center;
+}
+	  
+h2 {
+		border: solid;  
+		margin-right:7%;
+		text-align : center
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+    background-color: #404040;
+    color: #fff;
+}
